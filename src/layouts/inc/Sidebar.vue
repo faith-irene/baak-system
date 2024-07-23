@@ -70,18 +70,19 @@
 <script>
 // import MenuItem from '@/components/spesials/MenuItem.vue';
 import axios from 'axios';
-import { mapStores } from 'pinia';
+import { mapStores, mapState } from 'pinia';
 import { userStore } from '@/stores/user';
+import { menuStore } from '@/stores/menu';
 
-
-
+//const iMenu = menuStore();
 export default {
     name : 'Sidabar',
     data(){
       return {
         menus : [],
         submenus : {},
-        name_role : ''
+        name_role : '',
+      //  isCollapse : iMenu.is_collapse // sudah menyimpan nilai state awal berupa 'FALSE'
       }
     },
     async beforeMount(){
@@ -90,6 +91,7 @@ export default {
     },
     computed: {
       ...mapStores(userStore),
+      ...mapState(menuStore,['is_collapse']),
       role(){
         return this.name_role = sessionStorage.getItem('name_role');
       }
@@ -99,8 +101,15 @@ export default {
         try {
           const role_id = sessionStorage.getItem('role');
           console.log(role_id);
-          const response = await axios.post('http://localhost:5000/api/v1/menu',{ role_id : role_id });
-          this.menus = response.data;
+          const response = await axios.post('http://localhost:5000/api/v1/getAccessMenu',{ role_id : role_id });
+          const menus = response.data;
+          const extra_menu = menus.map( index => ({
+            title : index.menu_title,
+            link : index.menu_link,
+            id : index.menu_id
+          }) );
+          console.log(extra_menu);
+          this.menus = extra_menu;
           await  this.fetchSubmenu();
         } catch(error) {
           console.info(error);
@@ -110,8 +119,8 @@ export default {
       async fetchSubmenu(){
         for ( const menu of this.menus ){
           try {
-            const response = await axios.post('http://localhost:5000/api/v1/submenu',{menu_id : menu.id});
-            // console.info(response.data);
+            const response = await axios.post('http://localhost:5000/api/v1/getSubmenu',{menu_id : menu.id});
+            console.info(response.data);
            this.submenus[menu.id] = response.data;
           
           } catch(error){

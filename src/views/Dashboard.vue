@@ -5,7 +5,6 @@ import ContentHeader from '@/layouts/inc/ContentHeader.vue';
 </script>
 <template>
     <ContentHeader>
-s
     </ContentHeader>
     <ContentBody>
         <div class="container-fluid">
